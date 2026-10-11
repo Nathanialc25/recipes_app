@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Recipe Remix{% endblock %}</title>
+
+  <!-- Tailwind via CDN — no build step -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col">
+
+  <!-- Page content -->
+  <main class="flex-1 px-4 pt-6 pb-24 max-w-md mx-auto w-full">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Bottom nav — hidden on login page -->
+  {% if session.get('user') %}
+  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200">
+    <div class="max-w-md mx-auto flex justify-around">
+      <a href="{{ url_for('home') }}"
+         class="flex-1 text-center py-4 text-sm text-neutral-600 hover:text-neutral-900">
+        Home
+      </a>
+      <a href="#" 
+         class="flex-1 text-center py-4 text-sm text-neutral-600 hover:text-neutral-900">
+        Convert
+      </a>
+      <a href="#" 
+         class="flex-1 text-center py-4 text-sm text-neutral-600 hover:text-neutral-900">
+        Saved
+      </a>
+    </div>
+  </nav>
+  {% endif %}
+
+</body>
+</html>
