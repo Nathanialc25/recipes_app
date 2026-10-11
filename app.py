@@ -1,12 +1,14 @@
 import os
 from flask import Flask, render_template, session, redirect, url_for
 from dotenv import load_dotenv
+import db
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
+db.init_db()
 
 '''---------- Routes ----------'''
 
