@@ -26,7 +26,7 @@ def login():
 
 @app.route("/home")
 def home():
-    """Home page"""
+    """Home page, set the user once they have logged in"""
     user = session.get("user")
     if not user:
         return redirect(url_for("login"))
@@ -39,6 +39,7 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
-
+'''Great for dev work, the debug set to true will ocnstantly show the updated pages if I edit,
+also only runs right now if I literally run with python3 app.py'''
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
