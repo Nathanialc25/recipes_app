@@ -42,4 +42,4 @@ def logout():
 '''Great for dev work, the debug set to true will ocnstantly show the updated pages if I edit,
 also only runs right now if I literally run with python3 app.py'''
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5001)
