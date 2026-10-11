@@ -2,6 +2,8 @@ import os
 from flask import Flask, render_template, session, redirect, url_for
 from dotenv import load_dotenv
 import db
+import auth
+
 
 load_dotenv()
 
@@ -9,6 +11,9 @@ app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
 db.init_db()
+
+auth.init_oauth(app)
+app.register_blueprint(auth.auth_bp)
 
 '''---------- Routes ----------'''
 
@@ -34,12 +39,6 @@ def home():
         return redirect(url_for("login"))
     return render_template("home.html", user=user)
 
-
-@app.route("/logout")
-def logout():
-    """Clear the session and go back to login page """
-    session.clear()
-    return redirect(url_for("login"))
 
 '''Great for dev work, the debug set to true will ocnstantly show the updated pages if I edit,
 also only runs right now if I literally run with python3 app.py'''
