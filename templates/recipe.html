@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ recipe.name }} — Recipe Remix{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+  <a href="{{ url_for('saved') }}"
+     class="text-sm text-neutral-500 hover:text-neutral-900">
+    ← Saved recipes
+  </a>
+</div>
+
+{% if recipe.image_url %}
+<img src="{{ recipe.image_url }}" alt=""
+     class="w-full h-56 object-cover rounded-xl mb-4">
+{% endif %}
+
+<h1 class="text-2xl font-bold mb-2">{{ recipe.name }}</h1>
+
+<div class="text-sm text-neutral-500 mb-6 flex flex-wrap gap-x-4 gap-y-1">
+  {% if recipe.prep_time %}<span>Prep: {{ recipe.prep_time }}</span>{% endif %}
+  {% if recipe.cook_time %}<span>Cook: {{ recipe.cook_time }}</span>{% endif %}
+  {% if recipe.servings %}<span>Serves: {{ recipe.servings }}</span>{% endif %}
+</div>
+
+{% if recipe.source_url %}
+<p class="text-xs text-neutral-400 mb-6">
+  Source: <a href="{{ recipe.source_url }}" target="_blank"
+             class="underline hover:text-neutral-700">{{ recipe.source_url }}</a>
+</p>
+{% endif %}
+
+<h2 class="text-lg font-semibold mb-3">Ingredients</h2>
+<ul class="space-y-1 mb-6 list-disc list-inside text-neutral-800">
+  {% for ing in recipe.ingredients %}
+  <li>{{ ing }}</li>
+  {% endfor %}
+</ul>
+
+<h2 class="text-lg font-semibold mb-3">Instructions</h2>
+<ol class="space-y-3 text-neutral-800">
+  {% for step in recipe.instructions %}
+  <li class="flex gap-3">
+    <span class="font-medium text-neutral-400 flex-shrink-0">{{ loop.index }}.</span>
+    <span>{{ step }}</span>
+  </li>
+  {% endfor %}
+</ol>
+
+{% endblock %}

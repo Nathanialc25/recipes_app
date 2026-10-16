@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %} Let's add a recipe {% endblock %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">Convert a recipe below</h1>
+
+{% if error %}
+<div class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-lg p-3 mb-4">
+  {{ error }}
+</div>
+{% endif %}
+
+<!-- Toggle between the two options of URL and manual enter -->
+<div class="flex bg-neutral-100 rounded-full p-1 mb-6">
+  <a href="{{ url_for('convert', mode='url') }}"
+     class="flex-1 text-center py-2 rounded-full text-sm font-medium transition
+            {% if mode == 'url' %}bg-white shadow text-neutral-900{% else %}text-neutral-500{% endif %}">
+    URL
+  </a>
+  <a href="{{ url_for('convert', mode='manual') }}"
+     class="flex-1 text-center py-2 rounded-full text-sm font-medium transition
+            {% if mode == 'manual' %}bg-white shadow text-neutral-900{% else %}text-neutral-500{% endif %}">
+    Manual
+  </a>
+</div>
+
+<!-- URL form -->
+{% if mode == 'url' %}
+<form method="POST" action="{{ url_for('convert') }}" class="space-y-4">
+  <label class="block">
+    <span class="text-sm font-medium text-neutral-700">Recipe URL</span>
+    <input type="url" name="url" required
+           placeholder="https://example.com/recipe"
+           class="mt-1 w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-900">
+  </label>
+
+  <button type="submit"
+          class="w-full bg-neutral-900 text-white py-3 rounded-full font-medium hover:bg-neutral-700 transition">
+    Convert
+  </button>
+</form>
+
+<!-- Manual form -->
+{% else %}
+<form method="POST" action="{{ url_for('convert') }}" class="space-y-4">
+  <input type="hidden" name="mode" value="manual">
+
+  <label class="block">
+    <span class="text-sm font-medium text-neutral-700">Recipe name</span>
+    <input type="text" name="name" required
+           class="mt-1 w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-900">
+  </label>
+
+  <div class="flex gap-4">
+    <label class="block flex-1">
+      <span class="text-sm font-medium text-neutral-700">Prep time</span>
+      <input type="text" name="prep_time" placeholder="30 minutes"
+             class="mt-1 w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-900">
+    </label>
+    <label class="block flex-1">
+      <span class="text-sm font-medium text-neutral-700">Cook time</span>
+      <input type="text" name="cook_time" placeholder="1.5 hours"
+             class="mt-1 w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-900">
+    </label>
+  </div>
+
+  <label class="block">
+    <span class="text-sm font-medium text-neutral-700">Servings</span>
+    <input type="text" name="servings" placeholder="4"
+           class="mt-1 w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-900">
+  </label>
+
+  <label class="block">
+    <span class="text-sm font-medium text-neutral-700">Ingredients (one per line)</span>
+    <textarea name="ingredients" rows="6" required
+              class="mt-1 w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-900"></textarea>
+  </label>
+
+  <label class="block">
+    <span class="text-sm font-medium text-neutral-700">Instructions (one step per line)</span>
+    <textarea name="instructions" rows="8" required
+              class="mt-1 w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-900"></textarea>
+  </label>
+
+  <button type="submit"
+          class="w-full bg-neutral-900 text-white py-3 rounded-full font-medium hover:bg-neutral-700 transition">
+    Preview
+  </button>
+</form>
+{% endif %}
+
+{% endblock %}

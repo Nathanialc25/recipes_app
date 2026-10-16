@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Saved — Recipe Remix{% endblock %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">Saved recipes</h1>
+
+{% if recipes %}
+  <div class="space-y-3">
+    {% for r in recipes %}
+    <a href="{{ url_for('recipe_detail', recipe_id=r.id) }}"
+       class="block bg-white border border-neutral-200 rounded-xl overflow-hidden hover:border-neutral-400 transition">
+      <div class="flex">
+        {% if r.image_url %}
+        <img src="{{ r.image_url }}" alt=""
+             class="w-24 h-24 object-cover flex-shrink-0">
+        {% endif %}
+        <div class="p-3 flex-1 min-w-0">
+          <h2 class="font-medium truncate">{{ r.name }}</h2>
+          {% if r.prep_time or r.cook_time %}
+          <p class="text-xs text-neutral-500 mt-1">
+            {% if r.prep_time %}Prep {{ r.prep_time }}{% endif %}
+            {% if r.prep_time and r.cook_time %} · {% endif %}
+            {% if r.cook_time %}Cook {{ r.cook_time }}{% endif %}
+          </p>
+          {% endif %}
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center py-16">
+    <p class="text-neutral-500 mb-4">No saved recipes yet.</p>
+    <a href="{{ url_for('convert') }}"
+       class="inline-block bg-neutral-900 text-white px-6 py-3 rounded-full font-medium hover:bg-neutral-700 transition">
+      Convert a recipe
+    </a>
+  </div>
+{% endif %}
+
+{% endblock %}
