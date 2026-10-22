@@ -8,7 +8,7 @@ DB_PATH = os.getenv("DATABASE_PATH", "recipes.db")
 def get_connection():
     """Open a connection to the SQLite database"""
     conn = sqlite3.connect(DB_PATH)
-    # makes the rows return as dicts so we can access them via values
+    # makes the results from a tuple to a special row, allowing me to select by key, as opposed to only index.
     conn.row_factory = sqlite3.Row  
     return conn
 

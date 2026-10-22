@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template, session, redirect, url_for, request, jsonify
 from parse import parse_recipe_from_url
 from dotenv import load_dotenv
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 import db
 import auth
@@ -10,6 +11,7 @@ import auth
 load_dotenv()
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
 db.init_db()
@@ -17,7 +19,7 @@ db.init_db()
 auth.init_oauth(app)
 app.register_blueprint(auth.auth_bp)
 
-'''---------- Routes ----------'''
+'''---------- Routes ------------'''
 
 @app.route("/")
 def index():
