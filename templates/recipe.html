@@ -57,4 +57,27 @@
   </ol>
 </div>
 
+<div class="border-t border-stone-200 pt-6 mt-6">
+  <h2 class="text-sm font-medium text-stone-500 uppercase tracking-wide mb-3">Send to a friend</h2>
+  {% if friends %}
+  <form method="POST" action="{{ url_for('recipe_send', recipe_id=recipe.id) }}" class="flex gap-2">
+    <select name="friend_id" required
+            class="flex-1 border border-stone-300 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:border-emerald-700 focus:ring-1 focus:ring-emerald-700">
+      <option value="">Choose a friend…</option>
+      {% for f in friends %}
+      <option value="{{ f.id }}">{{ f.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit"
+            class="bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-emerald-800 transition">
+      Send
+    </button>
+  </form>
+  {% else %}
+  <p class="text-sm text-stone-500">
+    <a href="{{ url_for('friends') }}" class="text-emerald-700 hover:text-emerald-800 underline">Add a friend</a> to send this recipe.
+  </p>
+  {% endif %}
+</div>
+
 {% endblock %}

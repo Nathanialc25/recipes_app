@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy — GoodEats{% endblock %}
+
+{% block content %}
+
+<div class="pt-2 pb-6">
+  <h1 class="text-2xl font-semibold tracking-tight mb-1">Privacy Policy</h1>
+  <p class="text-xs text-stone-400">Last updated {{ today }}</p>
+</div>
+
+<div class="space-y-6 text-sm text-stone-700 leading-relaxed">
+
+  <div>
+    <h2 class="text-sm font-medium text-stone-500 uppercase tracking-wide mb-2">What this app is</h2>
+    <p>GoodEats is a personal recipe application. You can convert recipes from URLs, save them, and share them with friends. This page explains what data we handle and why.</p>
+  </div>
+
+  <div>
+    <h2 class="text-sm font-medium text-stone-500 uppercase tracking-wide mb-2">What we collect</h2>
+    <p>When you sign in with Google, we receive your name, email address, and profile picture URL. That's it. We use this to identify you, display your name, and connect you with friends who share recipes.</p>
+  </div>
+
+
+
+  <div>
+    <h2 class="text-sm font-medium text-stone-500 uppercase tracking-wide mb-2">Where it's stored</h2>
+    <p>Your data lives in a PostgreSQL database hosted by Neon. It's encrypted in transit and at rest. You can request deletion of your account and all associated data by emailing the address below.</p>
+  </div>
+
+  <div>
+    <h2 class="text-sm font-medium text-stone-500 uppercase tracking-wide mb-2">Third parties</h2>
+    <p>The app uses Google for sign-in, Google Gemini for recipe parsing, and Neon for database hosting. Each of these services has its own privacy policy. No other third parties receive your data.</p>
+  </div>
+
+  <div>
+    <h2 class="text-sm font-medium text-stone-500 uppercase tracking-wide mb-2">Contact</h2>
+    <p>Questions or deletion requests: <a href="mailto:nathanialc17@gmail.com" class="text-emerald-700 hover:text-emerald-800 underline">nathanialc17@gmail.com</a></p>
+  </div>
+
+</div>
+
+<div class="mt-12 pt-6 border-t border-stone-200">
+  <a href="{{ url_for('home') }}" class="text-xs text-stone-400 hover:text-stone-700">← Back to app</a>
+</div>
+
+{% endblock %}

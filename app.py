@@ -3,7 +3,7 @@ from flask import Flask, render_template, session, redirect, url_for, request, j
 from parse import parse_recipe_from_url
 from dotenv import load_dotenv
 from werkzeug.middleware.proxy_fix import ProxyFix
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 
 import db
@@ -51,6 +51,16 @@ def timeago_filter(dt):
         return f"{mo} month{'s' if mo != 1 else ''} ago"
     y = int(seconds // 31536000)
     return f"{y} year{'s' if y != 1 else ''} ago"
+
+@app.context_processor
+def inject_notifications():
+    """Make pending_count and inbox_count available to all templates."""
+    user = session.get("user")
+    if not user:
+        return {"pending_count": 0, "inbox_count": 0}
+    pending = len(db.get_pending_requests_for(user["id"]))
+    inbox = len(db.get_inbox_for_user(user["id"]))
+    return {"pending_count": pending, "inbox_count": inbox}
 
 db.init_db()
 
@@ -187,7 +197,6 @@ def saved():
 
 @app.route("/recipe/<int:recipe_id>")
 def recipe_detail(recipe_id):
-    """Show one recipe."""
     user = session.get("user")
     if not user:
         return redirect(url_for("login"))
@@ -196,7 +205,142 @@ def recipe_detail(recipe_id):
     if not recipe:
         return redirect(url_for("saved"))
 
-    return render_template("recipe.html", user=user, recipe=recipe)
+    friends = db.get_friends_for(user["id"])
+    return render_template("recipe.html", user=user, recipe=recipe, friends=friends)
+
+@app.route("/friends")
+def friends():
+    """Friend list + pending requests + add-friend form."""
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+    friends_list = db.get_friends_for(user["id"])
+    pending = db.get_pending_requests_for(user["id"])
+    return render_template(
+        "friends.html", user=user, friends=friends_list, pending=pending,
+        error=request.args.get("error"), sent=request.args.get("sent"),
+        view="friends", inbox=[],
+    )
+
+
+@app.route("/friends/add", methods=["POST"])
+def friends_add():
+    """Handle the add-friend form."""
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    email = request.form.get("email", "").strip().lower()
+    if not email:
+        return redirect(url_for("friends", error="Enter an email."))
+
+    if email == user["email"].lower():
+        return redirect(url_for("friends", error="You can't friend yourself."))
+
+    target = db.get_user_by_email(email)
+    if not target:
+        return redirect(url_for("friends", error="No user with that email. They need to log in first."))
+
+    existing = db.get_friendship_between(user["id"], target["id"])
+    if existing:
+        if existing["status"] == "accepted":
+            return redirect(url_for("friends", error="You're already friends."))
+        return redirect(url_for("friends", error="A request already exists."))
+
+    db.create_friend_request(user["id"], target["id"])
+    return redirect(url_for("friends", sent="1"))
+
+
+@app.route("/friends/accept/<int:friendship_id>", methods=["POST"])
+def friends_accept(friendship_id):
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+    db.accept_friend_request(friendship_id, user["id"])
+    return redirect(url_for("friends"))
+
+
+@app.route("/friends/decline/<int:friendship_id>", methods=["POST"])
+def friends_decline(friendship_id):
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+    db.decline_friend_request(friendship_id, user["id"])
+    return redirect(url_for("friends"))
+
+@app.route("/recipe/<int:recipe_id>/send", methods=["POST"])
+def recipe_send(recipe_id):
+    """Send a recipe to a friend's inbox."""
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    recipe = db.get_recipe(recipe_id, user["id"])
+    if not recipe:
+        return redirect(url_for("saved"))
+
+    friend_id = request.form.get("friend_id", type=int)
+    if not friend_id:
+        return redirect(url_for("recipe_detail", recipe_id=recipe_id))
+
+    # Verify the target is actually a friend
+    friends = db.get_friends_for(user["id"])
+    if not any(f["id"] == friend_id for f in friends):
+        return redirect(url_for("recipe_detail", recipe_id=recipe_id))
+
+    db.send_shared_recipe(friend_id, user["id"], recipe)
+    return redirect(url_for("recipe_detail", recipe_id=recipe_id))
+
+
+@app.route("/friends/inbox")
+def friends_inbox():
+    """Shared recipes inbox."""
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    inbox = db.get_inbox_for_user(user["id"])
+    friends_list = db.get_friends_for(user["id"])
+    pending = db.get_pending_requests_for(user["id"])
+
+    return render_template(
+        "friends.html",
+        user=user,
+        friends=friends_list,
+        pending=pending,
+        inbox=inbox,
+        view="inbox",
+    )
+
+
+@app.route("/shared/<int:shared_id>/save", methods=["POST"])
+def shared_save(shared_id):
+    """Copy a shared recipe into the current user's collection."""
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    new_id = db.copy_shared_to_saved(shared_id, user["id"])
+    if new_id:
+        return redirect(url_for("recipe_detail", recipe_id=new_id))
+    return redirect(url_for("friends_inbox"))
+
+
+@app.route("/shared/<int:shared_id>/dismiss", methods=["POST"])
+def shared_dismiss(shared_id):
+    """Remove a shared recipe from the inbox without saving."""
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    db.dismiss_shared_recipe(shared_id, user["id"])
+    return redirect(url_for("friends_inbox"))
+
+
+@app.route("/privacy")
+def privacy():
+    today = date.today().strftime("%B %d, %Y")
+    return render_template("privacy.html", today=today)
 
 '''Great for dev work, the debug set to true will ocnstantly show the updated pages if I edit,
 also only runs right now if I literally run with python3 app.py, ignored when I deploy app any different '''
