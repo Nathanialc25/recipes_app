@@ -158,6 +158,6 @@ def recipe_detail(recipe_id):
     return render_template("recipe.html", user=user, recipe=recipe)
 
 '''Great for dev work, the debug set to true will ocnstantly show the updated pages if I edit,
-also only runs right now if I literally run with python3 app.py'''
+also only runs right now if I literally run with python3 app.py, ignored when I deploy app any different '''
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5001)
