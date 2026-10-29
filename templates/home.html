@@ -1,10 +1,16 @@
 {% extends "base.html" %}
-
-{% block title %}Home — Recipe Remix{% endblock %}
-
+{% block title %}Home — Good Eats{% endblock %}
 {% block content %}
 
-<h1 class="text-2xl font-bold mb-2">Welcome back</h1>
-<p class="text-neutral-500">{{ user.name }}</p>
+<div class="flex justify-between items-start mb-6">
+  <div>
+    <h1 class="text-2xl font-bold">Welcome back</h1>
+    <p class="text-neutral-500">{{ user.name }}</p>
+  </div>
+  <a href="{{ url_for('auth.logout') }}"
+     class="text-sm text-neutral-500 hover:text-neutral-900">
+    Log out
+  </a>
+</div>
 
 {% endblock %}
