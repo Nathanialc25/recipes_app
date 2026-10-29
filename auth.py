@@ -27,7 +27,6 @@ def init_oauth(app):
 def login():
     """Kick off the OAuth flow, send the user to Google."""
     redirect_uri = url_for("auth.callback", _external=True)
-    print(f"DEBUG redirect_uri = {redirect_uri}")
     # Tell Google where to send the user back after they log in
     return oauth.google.authorize_redirect(redirect_uri)
 
