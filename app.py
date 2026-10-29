@@ -3,6 +3,8 @@ from flask import Flask, render_template, session, redirect, url_for, request, j
 from parse import parse_recipe_from_url
 from dotenv import load_dotenv
 from werkzeug.middleware.proxy_fix import ProxyFix
+from datetime import datetime, timezone
+
 
 import db
 import auth
@@ -13,6 +15,42 @@ load_dotenv()
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
+
+@app.template_filter("timeago")
+def timeago_filter(dt):
+    """Turn a timestamp into '2 days ago' style text."""
+    if not dt:
+        return ""
+    if isinstance(dt, str):
+        try:
+            dt = datetime.fromisoformat(dt.replace("Z", "+00:00"))
+        except ValueError:
+            return ""
+    now = datetime.now(timezone.utc)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    delta = now - dt
+    seconds = delta.total_seconds()
+
+    if seconds < 60:
+        return "just now"
+    if seconds < 3600:
+        m = int(seconds // 60)
+        return f"{m} minute{'s' if m != 1 else ''} ago"
+    if seconds < 86400:
+        h = int(seconds // 3600)
+        return f"{h} hour{'s' if h != 1 else ''} ago"
+    if seconds < 604800:
+        d = int(seconds // 86400)
+        return f"{d} day{'s' if d != 1 else ''} ago"
+    if seconds < 2592000:
+        w = int(seconds // 604800)
+        return f"{w} week{'s' if w != 1 else ''} ago"
+    if seconds < 31536000:
+        mo = int(seconds // 2592000)
+        return f"{mo} month{'s' if mo != 1 else ''} ago"
+    y = int(seconds // 31536000)
+    return f"{y} year{'s' if y != 1 else ''} ago"
 
 db.init_db()
 
@@ -41,7 +79,10 @@ def home():
     user = session.get("user")
     if not user:
         return redirect(url_for("login"))
-    return render_template("home.html", user=user)
+    ''' getting more info to make homepage a bit more robust'''
+    recipes = db.get_recipes_for_user(user["id"])
+    recent = recipes[:3]
+    return render_template("home.html", user=user, recent=recent, total=len(recipes))
 
 
 @app.route("/convert", methods=["GET", "POST"])

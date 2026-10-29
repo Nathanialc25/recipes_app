@@ -1,25 +1,36 @@
 {% extends "base.html" %}
 
-{% block title %}Saved — GoodEats {% endblock %}
+{% block title %}Saved — GoodEats{% endblock %}
 
 {% block content %}
 
-<h1 class="text-2xl font-bold mb-6">Saved recipes</h1>
+<div class="flex justify-between items-baseline mb-6">
+  <h1 class="text-2xl font-semibold tracking-tight">Saved recipes</h1>
+  {% if recipes %}
+  <span class="text-sm text-stone-500">{{ recipes|length }}</span>
+  {% endif %}
+</div>
 
 {% if recipes %}
   <div class="space-y-3">
     {% for r in recipes %}
     <a href="{{ url_for('recipe_detail', recipe_id=r.id) }}"
-       class="block bg-white border border-neutral-200 rounded-xl overflow-hidden hover:border-neutral-400 transition">
+       class="block bg-white border border-stone-200 rounded-2xl overflow-hidden hover:border-stone-400 hover:-translate-y-0.5 hover:shadow-sm transition">
       <div class="flex">
         {% if r.image_url %}
         <img src="{{ r.image_url }}" alt=""
-             class="w-24 h-24 object-cover flex-shrink-0">
+             class="w-20 h-20 object-cover flex-shrink-0">
+        {% else %}
+        <div class="w-20 h-20 bg-stone-100 flex-shrink-0 flex items-center justify-center text-stone-300">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7l9-4 9 4v10l-9 4-9-4V7z"/>
+          </svg>
+        </div>
         {% endif %}
-        <div class="p-3 flex-1 min-w-0">
-          <h2 class="font-medium truncate">{{ r.name }}</h2>
+        <div class="p-4 flex-1 min-w-0 flex flex-col justify-center">
+          <h2 class="font-medium text-stone-900 truncate">{{ r.name }}</h2>
           {% if r.prep_time or r.cook_time %}
-          <p class="text-xs text-neutral-500 mt-1">
+          <p class="text-xs text-stone-400 mt-1">
             {% if r.prep_time %}Prep {{ r.prep_time }}{% endif %}
             {% if r.prep_time and r.cook_time %} · {% endif %}
             {% if r.cook_time %}Cook {{ r.cook_time }}{% endif %}
@@ -31,10 +42,16 @@
     {% endfor %}
   </div>
 {% else %}
-  <div class="text-center py-16">
-    <p class="text-neutral-500 mb-4">No saved recipes yet.</p>
+  <div class="text-center py-12">
+    <div class="w-16 h-16 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-stone-400">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4-7 4V5z"/>
+      </svg>
+    </div>
+    <h2 class="font-medium text-stone-900 mb-1">Nothing saved yet</h2>
+    <p class="text-stone-500 text-sm mb-6">Recipes you convert and save will show up here.</p>
     <a href="{{ url_for('convert') }}"
-       class="inline-block bg-neutral-900 text-white px-6 py-3 rounded-full font-medium hover:bg-neutral-700 transition">
+       class="inline-block bg-emerald-700 text-white px-6 py-3 rounded-xl font-medium hover:bg-emerald-800 transition">
       Convert a recipe
     </a>
   </div>

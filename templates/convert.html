@@ -1,91 +1,90 @@
 {% extends "base.html" %}
 
-{% block title %} Let's add a recipe {% endblock %}
+{% block title %}Convert — GoodEats{% endblock %}
 
 {% block content %}
 
-<h1 class="text-2xl font-bold mb-6">Convert a recipe below</h1>
+<h1 class="text-2xl font-semibold tracking-tight mb-6">Convert a recipe</h1>
 
 {% if error %}
-<div class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-lg p-3 mb-4">
+<div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3 mb-5">
   {{ error }}
 </div>
 {% endif %}
 
-<!-- Toggle between the two options of URL and manual enter -->
-<div class="flex bg-neutral-100 rounded-full p-1 mb-6">
+<div class="flex bg-stone-100 rounded-full p-1 mb-6">
   <a href="{{ url_for('convert', mode='url') }}"
-     class="flex-1 text-center py-2 rounded-full text-sm font-medium transition
-            {% if mode == 'url' %}bg-white shadow text-neutral-900{% else %}text-neutral-500{% endif %}">
+     class="flex-1 text-center py-2 rounded-full text-sm transition
+            {% if mode == 'url' %}bg-white shadow-sm text-stone-900 font-medium{% else %}text-stone-500{% endif %}">
     URL
   </a>
   <a href="{{ url_for('convert', mode='manual') }}"
-     class="flex-1 text-center py-2 rounded-full text-sm font-medium transition
-            {% if mode == 'manual' %}bg-white shadow text-neutral-900{% else %}text-neutral-500{% endif %}">
+     class="flex-1 text-center py-2 rounded-full text-sm transition
+            {% if mode == 'manual' %}bg-white shadow-sm text-stone-900 font-medium{% else %}text-stone-500{% endif %}">
     Manual
   </a>
 </div>
 
-<!-- URL form -->
 {% if mode == 'url' %}
-<form method="POST" action="{{ url_for('convert') }}" class="space-y-4">
-  <label class="block">
-    <span class="text-sm font-medium text-neutral-700">Recipe URL</span>
+<form method="POST" action="{{ url_for('convert') }}" class="space-y-5">
+  <div>
+    <label class="block text-sm font-medium text-stone-700 mb-1.5">Recipe URL</label>
     <input type="url" name="url" required
            placeholder="https://example.com/recipe"
-           class="mt-1 w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-900">
-  </label>
+           class="w-full border border-stone-300 rounded-xl px-4 py-3 text-base
+                  focus:outline-none focus:border-emerald-700 focus:ring-1 focus:ring-emerald-700">
+    <p class="text-xs text-stone-400 mt-2">Most recipe blogs work. If one doesn't, try another site.</p>
+  </div>
 
   <button type="submit"
-          class="w-full bg-neutral-900 text-white py-3 rounded-full font-medium hover:bg-neutral-700 transition">
+          class="w-full bg-emerald-700 text-white py-3.5 rounded-xl font-medium hover:bg-emerald-800 transition">
     Convert
   </button>
 </form>
 
-<!-- Manual form -->
 {% else %}
-<form method="POST" action="{{ url_for('convert') }}" class="space-y-4">
+<form method="POST" action="{{ url_for('convert') }}" class="space-y-5">
   <input type="hidden" name="mode" value="manual">
 
-  <label class="block">
-    <span class="text-sm font-medium text-neutral-700">Recipe name</span>
+  <div>
+    <label class="block text-sm font-medium text-stone-700 mb-1.5">Recipe name</label>
     <input type="text" name="name" required
-           class="mt-1 w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-900">
-  </label>
-
-  <div class="flex gap-4">
-    <label class="block flex-1">
-      <span class="text-sm font-medium text-neutral-700">Prep time</span>
-      <input type="text" name="prep_time" placeholder="30 minutes"
-             class="mt-1 w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-900">
-    </label>
-    <label class="block flex-1">
-      <span class="text-sm font-medium text-neutral-700">Cook time</span>
-      <input type="text" name="cook_time" placeholder="1.5 hours"
-             class="mt-1 w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-900">
-    </label>
+           class="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-700 focus:ring-1 focus:ring-emerald-700">
   </div>
 
-  <label class="block">
-    <span class="text-sm font-medium text-neutral-700">Servings</span>
+  <div class="flex gap-3">
+    <div class="flex-1">
+      <label class="block text-sm font-medium text-stone-700 mb-1.5">Prep time</label>
+      <input type="text" name="prep_time" placeholder="15 min"
+             class="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-700 focus:ring-1 focus:ring-emerald-700">
+    </div>
+    <div class="flex-1">
+      <label class="block text-sm font-medium text-stone-700 mb-1.5">Cook time</label>
+      <input type="text" name="cook_time" placeholder="20 min"
+             class="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-700 focus:ring-1 focus:ring-emerald-700">
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium text-stone-700 mb-1.5">Servings</label>
     <input type="text" name="servings" placeholder="4"
-           class="mt-1 w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-900">
-  </label>
+           class="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-700 focus:ring-1 focus:ring-emerald-700">
+  </div>
 
-  <label class="block">
-    <span class="text-sm font-medium text-neutral-700">Ingredients (one per line)</span>
+  <div>
+    <label class="block text-sm font-medium text-stone-700 mb-1.5">Ingredients <span class="text-stone-400 font-normal">(one per line)</span></label>
     <textarea name="ingredients" rows="6" required
-              class="mt-1 w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-900"></textarea>
-  </label>
+              class="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-700 focus:ring-1 focus:ring-emerald-700"></textarea>
+  </div>
 
-  <label class="block">
-    <span class="text-sm font-medium text-neutral-700">Instructions (one step per line)</span>
+  <div>
+    <label class="block text-sm font-medium text-stone-700 mb-1.5">Instructions <span class="text-stone-400 font-normal">(one step per line)</span></label>
     <textarea name="instructions" rows="8" required
-              class="mt-1 w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-neutral-900"></textarea>
-  </label>
+              class="w-full border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-700 focus:ring-1 focus:ring-emerald-700"></textarea>
+  </div>
 
   <button type="submit"
-          class="w-full bg-neutral-900 text-white py-3 rounded-full font-medium hover:bg-neutral-700 transition">
+          class="w-full bg-emerald-700 text-white py-3.5 rounded-xl font-medium hover:bg-emerald-800 transition">
     Preview
   </button>
 </form>

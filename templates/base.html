@@ -5,42 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}GoodEats{% endblock %}</title>
 
-  <!-- PWA -->
   <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
   <meta name="theme-color" content="#1c1c1c">
-
-  <!-- iOS-specific -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Recipes">
+  <meta name="apple-mobile-web-app-title" content="GoodEats">
 
-  <!-- Tailwind via CDN — no build step -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col">
+<body class="bg-stone-50 text-stone-900 min-h-screen flex flex-col antialiased">
 
-  <!-- Page content -->
-  <main class="flex-1 px-4 pt-6 pb-24 max-w-md mx-auto w-full">
+  <main class="flex-1 px-5 pt-8 pb-28 max-w-md mx-auto w-full">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Bottom nav — hidden on login page -->
   {% if session.get('user') %}
-  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200">
-    <div class="max-w-md mx-auto flex justify-around">
+  {% set current = request.endpoint or '' %}
+  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200">
+    <div class="max-w-md mx-auto flex">
+
       <a href="{{ url_for('home') }}"
-         class="flex-1 text-center py-4 text-sm text-neutral-600 hover:text-neutral-900">
+         class="flex-1 flex flex-col items-center gap-1 py-3 text-xs
+                {% if current == 'home' %}text-emerald-700 font-medium{% else %}text-stone-400{% endif %}">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10h14V10"/>
+        </svg>
         Home
-      </a> 
+      </a>
+
       <a href="{{ url_for('convert') }}"
-         class="flex-1 text-center py-4 text-sm text-neutral-600 hover:text-neutral-900">
+         class="flex-1 flex flex-col items-center gap-1 py-3 text-xs
+                {% if current in ('convert', 'preview', 'preview_save') %}text-emerald-700 font-medium{% else %}text-stone-400{% endif %}">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
         Convert
       </a>
+
       <a href="{{ url_for('saved') }}"
-         class="flex-1 text-center py-4 text-sm text-neutral-600 hover:text-neutral-900">
+         class="flex-1 flex flex-col items-center gap-1 py-3 text-xs
+                {% if current in ('saved', 'recipe_detail') %}text-emerald-700 font-medium{% else %}text-stone-400{% endif %}">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4-7 4V5z"/>
+        </svg>
         Saved
       </a>
+
     </div>
   </nav>
   {% endif %}
