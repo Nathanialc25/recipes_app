@@ -5,3 +5,4 @@ requests==2.32.3
 beautifulsoup4==4.12.3
 psycopg2-binary==2.9.13
 gunicorn==23.0.0
+curl_cffi==0.17.0

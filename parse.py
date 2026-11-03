@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import json
-import requests
+from  curl_cffi import requests
 from bs4 import BeautifulSoup
 import html as html_module
 
@@ -15,7 +15,13 @@ HEADERS = {
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/120.0.0.0 Safari/537.36"
-    )
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Referer": "https://www.google.com/",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
 }
 
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
@@ -23,12 +29,12 @@ GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:ge
 
 
 def fetch_html(url):
-    """Fetch a URL and return the HTML as text. Returns None on failure."""
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=10)
+        # impersonate="chrome" makes the TLS handshake look like a real browser
+        resp = requests.get(url, impersonate="chrome", timeout=10)
         resp.raise_for_status()
         return resp.text
-    except requests.RequestException as e:
+    except Exception as e:
         print(f"fetch failed: {e}")
         return None
 
