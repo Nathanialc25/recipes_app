@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Home — GoodEats{% endblock %}
+{% block title %}Your Personal Cookbook, GoodEats{% endblock %}
 
 {% block content %}
 
 <div class="flex justify-between items-start mb-8">
   <div>
-    <h1 class="text-2xl font-semibold tracking-tight">Welcome back</h1>
+    <h1 class="text-2xl font-semibold tracking-tight">Welcome to Your Personal Cookbook</h1>
     <p class="text-stone-500 text-sm mt-1">{{ user.name }}</p>
   </div>
   <a href="{{ url_for('auth.logout') }}"
@@ -17,20 +17,34 @@
 
 {% if total > 0 %}
 
-<!-- Stats row -->
-<div class="bg-white border border-stone-200 rounded-2xl p-5 mb-6">
+<!-- Stats -->
+<div class="bg-white border border-stone-200 rounded-2xl p-5 mb-4">
   <div class="flex items-baseline gap-2">
     <span class="text-3xl font-semibold tracking-tight text-emerald-700">{{ total }}</span>
     <span class="text-stone-500 text-sm">recipe{% if total != 1 %}s{% endif %} saved</span>
   </div>
+  <p class="text-xs text-stone-400 mt-2">Recipes you've saved for later.</p>
   <a href="{{ url_for('saved') }}"
-     class="text-xs text-emerald-700 hover:text-emerald-800 font-medium mt-2 inline-block">
-    See all →
+     class="text-xs text-emerald-700 hover:text-emerald-800 font-medium mt-3 inline-block">
+    Open your cookbook →
   </a>
 </div>
 
-<!-- Recent -->
-<h2 class="text-sm font-medium text-stone-500 uppercase tracking-wide mb-3">Recently saved</h2>
+<!-- Surprise me -->
+<div class="bg-white border border-stone-200 rounded-2xl p-5 mb-6">
+  <p class="text-sm text-stone-500 mb-3">What should I make tonight?</p>
+  <a href="{{ url_for('surprise') }}"
+     class="inline-flex items-center gap-2 bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-emerald-800 transition">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+    </svg>
+    Surprise me
+  </a>
+  <p class="text-xs text-stone-400 mt-3">Or <a href="{{ url_for('saved') }}" class="text-emerald-700 hover:underline">browse your cookbook</a></p>
+</div>
+
+<!-- Recently added -->
+<h2 class="text-sm font-medium text-stone-500 uppercase tracking-wide mb-3">Recently added</h2>
 
 <div class="space-y-3">
   {% for r in recent %}
@@ -50,28 +64,31 @@
       <div class="p-4 flex-1 min-w-0 flex flex-col justify-center">
         <h3 class="font-medium text-stone-900 truncate">{{ r.name }}</h3>
         <p class="text-xs text-stone-400 mt-1">{{ r.created_at | timeago }}</p>
+        {% if r.last_cooked %}
+        <p class="text-xs text-emerald-700 mt-1">Made {{ r.last_cooked | timeago }}</p>
+        {% endif %}
+        {% if r.memory %}
+        <p class="text-xs text-stone-500 italic mt-1 truncate">"{{ r.memory }}"</p>
+        {% endif %}
       </div>
     </div>
   </a>
   {% endfor %}
 </div>
 
-<!-- Future: friends section goes here -->
-
 {% else %}
 
-<!-- Empty state -->
 <div class="text-center py-12">
   <div class="w-16 h-16 bg-stone-100 rounded-full mx-auto mb-4 flex items-center justify-center text-stone-400">
     <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M3 7l9-4 9 4v10l-9 4-9-4V7z"/>
     </svg>
   </div>
-  <h2 class="font-medium text-stone-900 mb-1">No recipes yet</h2>
-  <p class="text-stone-500 text-sm mb-6">Paste a URL and get a clean recipe.</p>
+  <h2 class="font-medium text-stone-900 mb-1">Your cookbook starts here</h2>
+  <p class="text-stone-500 text-sm mb-6">Add your first recipe to get started.</p>
   <a href="{{ url_for('convert') }}"
      class="inline-block bg-emerald-700 text-white px-6 py-3 rounded-xl font-medium hover:bg-emerald-800 transition">
-    Convert a recipe
+    Add a recipe
   </a>
 </div>
 

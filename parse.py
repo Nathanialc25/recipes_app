@@ -1,4 +1,5 @@
 import os
+import re
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -157,7 +158,7 @@ PAGE TEXT:
             timeout=30,
         )
         resp.raise_for_status()
-    except requests.RequestException as e:
+    except Exception as e:
         print(f"Gemini request failed: {e}")
         return None
 
@@ -189,6 +190,30 @@ PAGE TEXT:
     }
 
 
+def format_duration(raw):
+    """Convert ISO 8601 durations (PT1H30M) to human text (1 hr 30 min)."""
+    if not raw:
+        return ""
+    if not isinstance(raw, str):
+        return str(raw)
+
+    match = re.match(r"^P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$", raw)
+    if not match:
+        return raw.strip()
+
+    days, hours, minutes, seconds = match.groups()
+    parts = []
+    if days:
+        parts.append(f"{int(days)} day{'s' if int(days) != 1 else ''}")
+    if hours:
+        parts.append(f"{int(hours)} hr")
+    if minutes:
+        parts.append(f"{int(minutes)} min")
+    if seconds and not parts:
+        parts.append(f"{int(seconds)} sec")
+
+    return " ".join(parts) if parts else ""
+
 def parse_recipe_from_url(url):
     """Main entry point. Returns a normalized recipe dict, or None."""
     html = fetch_html(url)
@@ -204,8 +229,8 @@ def parse_recipe_from_url(url):
             "ingredients": normalize_ingredients(r.get("recipeIngredient", [])),
             "instructions": normalize_instructions(r.get("recipeInstructions", [])),
             "servings": normalize_yield(r.get("recipeYield", "")),
-            "prep_time": r.get("prepTime", ""),
-            "cook_time": r.get("cookTime", ""),
+            "prep_time": format_duration(r.get("prepTime", "")),
+            "cook_time": format_duration(r.get("cookTime", "")),
             "image_url": extract_image(r.get("image", "")),
             "source_url": url,
         }

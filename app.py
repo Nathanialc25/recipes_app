@@ -4,6 +4,7 @@ from parse import parse_recipe_from_url
 from dotenv import load_dotenv
 from werkzeug.middleware.proxy_fix import ProxyFix
 from datetime import date, datetime, timezone
+import random
 
 
 import db
@@ -207,6 +208,51 @@ def recipe_detail(recipe_id):
 
     friends = db.get_friends_for(user["id"])
     return render_template("recipe.html", user=user, recipe=recipe, friends=friends)
+
+@app.route("/recipe/<int:recipe_id>/memory", methods=["POST"])
+def save_recipe_memory(recipe_id):
+    """Save or update the note on a recipe."""
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    memory_text = request.form.get("memory", "").strip()
+    db.save_memory(recipe_id, user["id"], memory_text)
+    return redirect(url_for("recipe_detail", recipe_id=recipe_id))
+
+@app.route("/recipe/<int:recipe_id>/cooked", methods=["POST"])
+def mark_recipe_cooked(recipe_id):
+    """Mark a recipe as cooked (records the timestamp)."""
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    db.mark_cooked(recipe_id, user["id"])
+    return redirect(url_for("recipe_detail", recipe_id=recipe_id))
+
+@app.route("/surprise")
+def surprise():
+    """Redirect to a random recipe from the user's cookbook."""
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    recipes = db.get_recipes_for_user(user["id"])
+    if not recipes:
+        return redirect(url_for("convert"))
+
+    choice = random.choice(recipes)
+    return redirect(url_for("recipe_detail", recipe_id=choice["id"]))
+
+@app.route("/recipe/<int:recipe_id>/delete", methods=["POST"])
+def recipe_delete(recipe_id):
+    """Delete a recipe. Only the owner can do this."""
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    db.delete_recipe(recipe_id, user["id"])
+    return redirect(url_for("saved"))
 
 @app.route("/friends")
 def friends():

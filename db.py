@@ -54,6 +54,8 @@ def init_db():
             ingredients  TEXT NOT NULL,
             instructions TEXT NOT NULL,
             image_url    TEXT,
+            memory       TEXT,
+            last_cooked  TIMESTAMP,
             created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)
@@ -84,6 +86,7 @@ def init_db():
         shared_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """)
+    
     conn.commit()
     cur.close()
     release_connection(conn)
@@ -120,8 +123,8 @@ def create_recipe(user_id, recipe):
     cur.execute(
         """INSERT INTO recipes
            (user_id, name, source_url, servings, prep_time, cook_time,
-            ingredients, instructions, image_url)
-           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id""",
+            ingredients, instructions, image_url, memory)
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id""",
         (
             user_id,
             recipe["name"],
@@ -132,6 +135,7 @@ def create_recipe(user_id, recipe):
             json.dumps(recipe["ingredients"]),
             json.dumps(recipe["instructions"]),
             recipe.get("image_url", ""),
+            recipe.get("memory", ""),
         ),
     )
     recipe_id = cur.fetchone()["id"]
@@ -140,6 +144,49 @@ def create_recipe(user_id, recipe):
     release_connection(conn)
     return recipe_id
 
+def save_memory(recipe_id, user_id, memory_text):
+    """Update the note on a recipe. Only the owner can edit."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """UPDATE recipes SET memory = %s
+           WHERE id = %s AND user_id = %s""",
+        (memory_text.strip() or None, recipe_id, user_id),
+    )
+    conn.commit()
+    changed = cur.rowcount
+    cur.close()
+    release_connection(conn)
+    return changed > 0
+
+def mark_cooked(recipe_id, user_id):
+    """Set last_cooked to now. Only the owner can mark it."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """UPDATE recipes SET last_cooked = CURRENT_TIMESTAMP
+           WHERE id = %s AND user_id = %s""",
+        (recipe_id, user_id),
+    )
+    conn.commit()
+    changed = cur.rowcount
+    cur.close()
+    release_connection(conn)
+    return changed > 0
+
+def delete_recipe(recipe_id, user_id):
+    """Delete a recipe. Only the owner can delete it."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "DELETE FROM recipes WHERE id = %s AND user_id = %s",
+        (recipe_id, user_id),
+    )
+    conn.commit()
+    changed = cur.rowcount
+    cur.close()
+    release_connection(conn)
+    return changed > 0
 
 def get_recipes_for_user(user_id):
     conn = get_connection()
@@ -370,6 +417,7 @@ def copy_shared_to_saved(shared_id, user_id):
         "ingredients": shared["ingredients"],
         "instructions": shared["instructions"],
         "image_url": shared.get("image_url", ""),
+        "memory": "",
     }
     new_id = create_recipe(user_id, recipe)
     dismiss_shared_recipe(shared_id, user_id)

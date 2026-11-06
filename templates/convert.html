@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Convert — GoodEats{% endblock %}
+{% block title %}Add a recipe{% endblock %}
 
 {% block content %}
 
-<h1 class="text-2xl font-semibold tracking-tight mb-6">Convert a recipe</h1>
+<h1 class="text-2xl font-semibold tracking-tight mb-1">Add a Recipe</h1>
+<p class="text-sm text-stone-500 mb-6">Paste a link from anywhere. We'll clean it up so you can actually cook from it.</p>
 
 {% if error %}
 <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3 mb-5">
@@ -16,12 +17,12 @@
   <a href="{{ url_for('convert', mode='url') }}"
      class="flex-1 text-center py-2 rounded-full text-sm transition
             {% if mode == 'url' %}bg-white shadow-sm text-stone-900 font-medium{% else %}text-stone-500{% endif %}">
-    URL
+    From a link
   </a>
   <a href="{{ url_for('convert', mode='manual') }}"
      class="flex-1 text-center py-2 rounded-full text-sm transition
             {% if mode == 'manual' %}bg-white shadow-sm text-stone-900 font-medium{% else %}text-stone-500{% endif %}">
-    Manual
+    Type it in
   </a>
 </div>
 
@@ -38,7 +39,7 @@
 
   <button type="submit"
           class="w-full bg-emerald-700 text-white py-3.5 rounded-xl font-medium hover:bg-emerald-800 transition">
-    Convert
+    Add to cookbook
   </button>
 </form>
 
