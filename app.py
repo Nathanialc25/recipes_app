@@ -12,6 +12,8 @@ from parse import parse_recipe_from_url
 
 load_dotenv()
 
+#this is what gunicorn is using as the wsgi app, and is called in the dockerfile
+# flask is for build wsgi apps, and guinicorn is the wsgi server, they have that agreement.
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
