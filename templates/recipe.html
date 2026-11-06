@@ -35,14 +35,21 @@
 
 <div class="border-t border-stone-200 pt-6 mt-2">
   <h2 class="text-sm font-medium text-stone-500 uppercase tracking-wide mb-3">Ingredients</h2>
-  <ul class="space-y-2 text-stone-800">
+  <ul class="space-y-1 text-stone-800">
     {% for ing in recipe.ingredients %}
-    <li class="flex gap-3 text-sm leading-relaxed">
-      <span class="text-emerald-700 mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-700 flex-shrink-0"></span>
-      <span>{{ ing }}</span>
+    <li>
+        <label class="flex gap-3 text-sm leading-relaxed cursor-pointer select-none
+                    hover:text-stone-600 py-1.5 group">
+        <input type="checkbox" class="peer sr-only"
+                onchange="this.closest('label').querySelector('span').classList.toggle('line-through');
+                        this.closest('label').querySelector('span').classList.toggle('text-stone-400');">
+        <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-stone-300 flex-shrink-0
+             peer-checked:bg-emerald-700 transition-colors"></span>
+        <span class="transition-colors">{{ ing }}</span>
+        </label>
     </li>
     {% endfor %}
-  </ul>
+</ul>
 </div>
 
 <div class="border-t border-stone-200 pt-6 mt-6">
