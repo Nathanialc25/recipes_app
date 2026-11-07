@@ -1,31 +1,103 @@
+<!-- Adding loads of comments to improve html understanding -->   
+
+<!--  Declares this is modern HTML5 -->   
 <!DOCTYPE html>
+
+<!--  Declares this is English -->   
 <html lang="en">
+
+<!-- head is always just metadata of the page, none of it is visible
+ its all just instructions for the browser  -->         
 <head>
+  <!--  UTF8 for decoding characters -->   
   <meta charset="UTF-8">
+  <!--  This is what allows the phone to assign the page to the width of the device
+    without it, it will be super zoomed out. so this helps render text at normal size -->   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+  <!--  title is text in the browser tab -->  
+  <!-- {% block title %}GoodEats{% endblock %} is jinja and not HTML, and it shows that
+   whatever the child template can overwrite this value if the block title is present -->
   <title>{% block title %}GoodEats{% endblock %}</title>
 
+  <!--  link is connecting to is how we connect to other resources
+  rel = 'manifest' is link to the web apps manifest file
+  using url_for is flask convention for having it standard, and not needing to change multiple places -->  
   <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+
   <meta name="theme-color" content="#1c1c1c">
+  <!--  specific meta tag that lets add to homescreen be a feature
+  All the following are apple* for ios pattern-->   
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <!--  makes the status bar transparent, like where the battery and clock are-->   
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="GoodEats">
 
+  <!--  script is the tage for load and run js,
+    and with src it loads the external file provided
+    
+  That URL is tailwinds play CDN version, its a script that when loaded scans the page for tailwind
+  class names, and generates css on the fly
+  
+  A real tailwind setup would compile CSS at build time, but this CDN version does it in browser
+  A bit slower, but its a fair trade off for a smaller app-->   
+
+  <!-- Also the peep the order
+   <script> is in <head>, so it loads before the <body>
+  the css is already read cleaned up before the body even appears-->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
+
+<!--  Body is everything the user will actually see-->   
+<!-- Body has a bunch of tailwind classes thats set up the layout-->
+
+<!-- bg-stone-50 — background color
+ text-stone-900 — default text color
+ min-h-screen — minimum height = 100% of the viewport, the body is at least as tall as the screen.
+ flex flex-col — makes the body a flex container with vertical direction. 
+            This is the setup for "content takes up available space, 
+            then nav sits at the bottom."
+ antialiased — enables font smoothing-->
 <body class="bg-stone-50 text-stone-900 min-h-screen flex flex-col antialiased">
 
+
+<!--<main> is a semantic tag meaning "the main content of the page." 
+  Screen readers and search engines use it to find the primary content.
+  and the block content will come from the other pages templates
+  
+  Strong example of template inheritance-->
   <main class="flex-1 px-5 pt-8 pb-28 max-w-md mx-auto w-full">
     {% block content %}{% endblock %}
   </main>
 
+<!-- if session has a logged in user, render the nav. otherwise skip it.
+ This is why the login page doesnt have the nav bar-->
+
+ <!-- <nav> is simply the a navigation menu-->
   {% if session.get('user') %}
   {% set current = request.endpoint or '' %}
   <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200">
     <div class="max-w-md mx-auto flex">
 
+      <!-- clicking will navigate to the url-->
+       <!-- flex-1 — each tab takes equal share of the row
+        flex flex-col items-center gap-1 — each tab's contents stack vertically
+                    (icon on top, label below), centered
+        py-3 — vertical padding 3 units
+        text-[10px] — font size 10px
+        tracking-wide — slightly increased letter spacing
+        -->
+
+        <!--Jinja to highlight to active tab as well-->
+        <!--<svg> is inline SVG — vector graphics drawn in the page itself
+          stroke="currentColor" - this will make it inherent from the color from the parent <a>.
+            so also green when selected or grey when not selected
+          -->
       <a href="{{ url_for('home') }}"
+
          class="flex-1 flex flex-col items-center gap-1 py-3 text-[10px] tracking-wide
                 {% if current == 'home' %}text-emerald-700 font-medium{% else %}text-stone-400{% endif %}">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
@@ -69,4 +141,5 @@
   {% endif %}
 
 </body>
+
 </html>
