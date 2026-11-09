@@ -1,16 +1,15 @@
+import html as html_module
+import json
 import os
 import re
 
+from bs4 import BeautifulSoup
+from curl_cffi import requests
 from dotenv import load_dotenv
+
 load_dotenv()
 
-import json
-from  curl_cffi import requests
-from bs4 import BeautifulSoup
-import html as html_module
-
-
-
+# 
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -31,7 +30,7 @@ GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:ge
 
 def fetch_html(url):
     try:
-        # impersonate="chrome" makes the TLS handshake look like a real browser
+        """impersonate="chrome" makes the TLS handshake look like a real browser."""
         resp = requests.get(url, impersonate="chrome", timeout=10)
         resp.raise_for_status()
         return resp.text
@@ -44,12 +43,17 @@ def extract_jsonld_recipes(html):
     """Find all JSON-LD blocks with @type == 'Recipe'. Returns a list of dicts."""
     soup = BeautifulSoup(html, "html.parser")
     recipes = []
+    '''find every <script> thats tag = "app/ld+json'''
     for tag in soup.find_all("script", type="application/ld+json"):
         try:
+            '''tag.string takes context inbetween the tag (<script>)
+            then json.loads parses the string into a python object really a dict.'''
             data = json.loads(tag.string or "")
         except (json.JSONDecodeError, TypeError):
             continue
 
+        '''data will be a dict. So this will just wrap the dict in a list really
+        this handles the different formats, so at the end of the day its a list(dict) either way'''
         candidates = data if isinstance(data, list) else [data]
 
         for item in candidates:
@@ -57,6 +61,7 @@ def extract_jsonld_recipes(html):
                 continue
             if item.get("@type") == "Recipe":
                 recipes.append(item)
+                """some websites use graph nesting"""
             elif "@graph" in item:
                 for sub in item["@graph"]:
                     if isinstance(sub, dict) and sub.get("@type") == "Recipe":
@@ -66,12 +71,18 @@ def extract_jsonld_recipes(html):
 
 def normalize_instructions(raw):
     """Instructions can be strings, objects, or nested lists. Normalize to list[str]."""
+    """Raw as a string"""
     if isinstance(raw, str):
         return [s.strip() for s in raw.split("\n") if s.strip()]
-
+    
+    """Raw is none or not a list"""
     if not isinstance(raw, list):
         return []
 
+    """Raw is a list of strings,
+        Raw is a list of objects(dicts) - howtostep, common for json-ld, looking for text key
+        Raw is a list of objects(dicts) - itemlistelement, less common but still used, looking for itemlistelement key
+        """
     steps = []
     for item in raw:
         if isinstance(item, str):
@@ -87,11 +98,12 @@ def normalize_instructions(raw):
 
 
 def normalize_ingredients(raw):
-    """Ingredients are usually a list of strings, but sometimes weird. Flatten to list[str]."""
+    """Ingredients are usually a list of strings option 3, but sometimes can also be a string option 1."""
     if isinstance(raw, str):
         return [s.strip() for s in raw.split("\n") if s.strip()]
     if not isinstance(raw, list):
         return []
+    """wrapping in str convert because sometimes the items in the list are inconsistent"""
     return [html_module.unescape(str(i).strip()) for i in raw if str(i).strip()]
 
 
@@ -120,26 +132,27 @@ def parse_recipe_with_llm(html, url):
         print("GEMINI_API_KEY not set; skipping LLM fallback")
         return None
 
+    """Gather what we can from the html as is, and return the text that may have nav and footer info."""
     soup = BeautifulSoup(html, "html.parser")
     text = soup.get_text(separator="\n", strip=True)[:8000]
 
     prompt = f"""You are a recipe extraction tool. Extract the recipe from the page text below.
 
-Return ONLY a JSON object, no markdown code fences, no commentary. Use this exact shape:
-{{
-  "name": "Recipe name",
-  "ingredients": ["ingredient 1", "ingredient 2"],
-  "instructions": ["step 1", "step 2"],
-  "servings": "4",
-  "prep_time": "15 min",
-  "cook_time": "20 min"
-}}
+        Return ONLY a JSON object, no markdown code fences, no commentary. Use this exact shape:
+        {{
+        "name": "Recipe name",
+        "ingredients": ["ingredient 1", "ingredient 2"],
+        "instructions": ["step 1", "step 2"],
+        "servings": "4",
+        "prep_time": "15 min",
+        "cook_time": "20 min"
+        }}
 
-If the text is not a recipe, return exactly: {{"error": "not a recipe"}}
+        If the text is not a recipe, return exactly: {{"error": "URL was not a recipe, try another site please"}}
 
-PAGE TEXT:
-{text}
-"""
+        PAGE TEXT:
+        {text}
+    """
 
     endpoint = GEMINI_URL.format(model=GEMINI_MODEL)
     payload = {
@@ -164,12 +177,18 @@ PAGE TEXT:
 
     try:
         data = resp.json()
+        """ the structure from gemeni is candadite -> content -> parts -> text
+        The shape requested in the prompt lies within the text"""
         raw = data["candidates"][0]["content"]["parts"][0]["text"]
     except (KeyError, IndexError, ValueError) as e:
         print(f"Unexpected Gemini response shape: {e}")
         return None
 
     try:
+        """ loads takes a json string, and turns it into an object
+        x - '{"name": "Garlic Pasta", "ingredients": ["1 lb pasta", ...]}'
+        y - {"name": "Garlic Pasta", "ingredients": ["1 lb pasta", ...]}
+        """
         recipe = json.loads(raw)
     except json.JSONDecodeError:
         print(f"Gemini returned non-JSON: {raw[:200]}")
@@ -203,12 +222,20 @@ def format_duration(raw):
 
     days, hours, minutes, seconds = match.groups()
     parts = []
+
     if days:
         parts.append(f"{int(days)} day{'s' if int(days) != 1 else ''}")
     if hours:
         parts.append(f"{int(hours)} hr")
-    if minutes:
-        parts.append(f"{int(minutes)} min")
+
+    # Roll seconds into minutes when they're 60+
+    total_minutes = int(minutes) if minutes else 0
+    if seconds:
+        total_minutes += int(seconds) // 60
+    if total_minutes:
+        parts.append(f"{total_minutes} min")
+
+    # Only show seconds if nothing else exists
     if seconds and not parts:
         parts.append(f"{int(seconds)} sec")
 

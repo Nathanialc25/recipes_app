@@ -1,6 +1,8 @@
 import os
-from flask import Blueprint, redirect, url_for, session
+
 from authlib.integrations.flask_client import OAuth
+from flask import Blueprint, redirect, url_for, session
+
 import db
 
 oauth = OAuth()
