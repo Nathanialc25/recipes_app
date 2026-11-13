@@ -3,7 +3,7 @@ import random
 from datetime import date, datetime, timezone
 
 from dotenv import load_dotenv
-from flask import Flask, render_template, session, redirect, url_for, request, jsonify
+from flask import Flask, render_template, session, redirect, url_for, request
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import auth
@@ -12,7 +12,7 @@ from parse import parse_recipe_from_url
 
 load_dotenv()
 
-#this is what gunicorn is using as the wsgi app, and is called in the dockerfile
+# this is what gunicorn is using as the wsgi app, and is called in the dockerfile
 # flask is for build wsgi apps, and guinicorn is the wsgi server, they have that agreement.
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
@@ -69,8 +69,8 @@ db.init_db()
 auth.init_oauth(app)
 app.register_blueprint(auth.auth_bp)
 
-'''---------- Routes ------------'''
 
+'''---------- Routes ------------'''
 @app.route("/")
 def index():
     """Entry point for the app, we send logged in users to home, and others to login."""
